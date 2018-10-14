@@ -5,6 +5,7 @@
  */
 package com.microsoft.azure.keyvault.spring;
 
+import com.microsoft.azure.keyvault.spring.AzureKeyVaultCredential.AzureKeyVaultCredentialProperties;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,7 +15,12 @@ public class AzureKeyVaultCredentialUnitTest {
 
     @Before
     public void setup() {
-        keyVaultCredential = new AzureKeyVaultCredential("fakeClientId", "fakeClientKey", 30);
+        keyVaultCredential = new AzureKeyVaultCredential(
+            AzureKeyVaultCredentialProperties.builder()
+                .clientId("fakeClientId")
+                .clientKey("fakeClientKey")
+                .timeoutInSeconds(30)
+                .build());
     }
 
     @Test(expected = RuntimeException.class)

@@ -8,6 +8,7 @@ package com.microsoft.azure.keyvault.spring;
 
 import com.microsoft.azure.AzureResponseBuilder;
 import com.microsoft.azure.keyvault.KeyVaultClient;
+import com.microsoft.azure.keyvault.spring.AzureKeyVaultCredential.AzureKeyVaultCredentialProperties;
 import com.microsoft.azure.serializer.AzureJacksonAdapter;
 import com.microsoft.azure.spring.support.UserAgent;
 import com.microsoft.azure.telemetry.TelemetryData;
@@ -34,17 +35,12 @@ class KeyVaultEnvironmentPostProcessorHelper {
     }
 
     public void addKeyVaultPropertySource() {
-        final String clientId = getProperty(this.environment, Constants.AZURE_CLIENTID);
-        final String clientKey = getProperty(this.environment, Constants.AZURE_CLIENTKEY);
         final String vaultUri = getProperty(this.environment, Constants.AZURE_KEYVAULT_VAULT_URI);
         final Long refreshInterval = Optional.ofNullable(
                 this.environment.getProperty(Constants.AZURE_KEYVAULT_REFRESH_INTERVAL))
                 .map(Long::valueOf).orElse(Constants.DEFAULT_REFRESH_INTERVAL_MS);
-        final long timeAcquiringTimeoutInSeconds = this.environment.getProperty(
-                Constants.AZURE_TOKEN_ACQUIRE_TIMEOUT_IN_SECONDS, Long.class, Constants.TOKEN_ACQUIRE_TIMEOUT_SECS);
-
-        final ServiceClientCredentials credentials = new AzureKeyVaultCredential(clientId, clientKey,
-                timeAcquiringTimeoutInSeconds);
+        final AzureKeyVaultCredentialProperties properties = loadKeyVaultCredentialProperties();
+        final ServiceClientCredentials credentials = new AzureKeyVaultCredential(properties);
         final RestClient restClient = new RestClient.Builder().withBaseUrl(vaultUri)
                 .withCredentials(credentials)
                 .withSerializerAdapter(new AzureJacksonAdapter())
@@ -71,6 +67,19 @@ class KeyVaultEnvironmentPostProcessorHelper {
         } catch (final Exception ex) {
             throw new IllegalStateException("Failed to configure KeyVault property source", ex);
         }
+    }
+
+    private AzureKeyVaultCredentialProperties loadKeyVaultCredentialProperties() {
+        return AzureKeyVaultCredentialProperties.builder()
+            .clientId(getProperty(this.environment, Constants.AZURE_CLIENTID))
+            .clientPfxFile(this.environment.getProperty(Constants.AZURE_CLIENT_PFX_FILE))
+            .clientPfxPassword(this.environment.getProperty(Constants.AZURE_CLIENT_PFX_PASSWORD))
+            .clientPublicCertificate(this.environment.getProperty(Constants.AZURE_CLIENT_PUBLIC_CERTIFICATE))
+            .clientPrivateKey(this.environment.getProperty(Constants.AZURE_CLIENT_PRIVATE_KEY))
+            .clientKey(this.environment.getProperty(Constants.AZURE_CLIENTKEY))
+            .timeoutInSeconds(this.environment.getProperty(Constants.AZURE_TOKEN_ACQUIRE_TIMEOUT_IN_SECONDS,
+                Long.class, Constants.TOKEN_ACQUIRE_TIMEOUT_SECS))
+            .build();
     }
 
     private String getProperty(final ConfigurableEnvironment env, final String propertyName) {

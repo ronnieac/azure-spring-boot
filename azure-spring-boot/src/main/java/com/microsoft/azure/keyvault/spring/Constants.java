@@ -11,6 +11,10 @@ import com.microsoft.azure.utils.PropertyLoader;
 public class Constants {
     public static final String AZURE_KEYVAULT_USER_AGENT = "spring-boot-starter/" + PropertyLoader.getProjectVersion();
     public static final String AZURE_CLIENTID = "azure.keyvault.client-id";
+    public static final String AZURE_CLIENT_PFX_FILE = "azure.keyvault.client-pfx-file";
+    public static final String AZURE_CLIENT_PFX_PASSWORD = "azure.keyvault.client-pfx-password";
+    public static final String AZURE_CLIENT_PUBLIC_CERTIFICATE = "azure.keyvault.client-public-certificate";
+    public static final String AZURE_CLIENT_PRIVATE_KEY = "azure.keyvault.client-private-key";
     public static final String AZURE_CLIENTKEY = "azure.keyvault.client-key";
     public static final String AZURE_KEYVAULT_ENABLED = "azure.keyvault.enabled";
     public static final String AZURE_KEYVAULT_VAULT_URI = "azure.keyvault.uri";
